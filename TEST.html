@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>撥號產生器</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.2/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>撥號產生器</h1>
+    <input type="file" id="fileInput" />
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    displayPhoneNumbers(json);
+                };
+                reader.readAsBinaryString(file);
+            }
+        }
+
+        function displayPhoneNumbers(data) {
+            let resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            
+            data.slice(1).forEach(row => {
+                if (row[0]) {
+                    const phoneNumber = row[0].toString().trim();
+                    const dialUrl = `<a href='tel:${phoneNumber}'>${phoneNumber}</a><br>`;
+                    resultDiv.innerHTML += dialUrl;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
